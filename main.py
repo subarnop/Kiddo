@@ -11,7 +11,7 @@ from keras.callbacks import ModelCheckpoint
 import load_data as data
 
 epochs = 20
-num_classes= 5
+num_classes= data.Load_data.getNumberofClass()
 input_shape = ( 28, 28, 1)
 batch_size = 128
 
