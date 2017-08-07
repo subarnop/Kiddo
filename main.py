@@ -22,11 +22,12 @@ y_train = y_train.astype('float32')
 x_test  = x_test.astype('float32')
 y_test  = y_test.astype('float32')
 '''
-image = x_train[231551]
-print(y_train[231551])
+image = x_train[130]
+print(y_train[130])
 image = np.reshape(image, ( 28, 28))
 imgplot = plt.imshow(image, cmap='gray')
 plt.show()
+
 '''
 x_train = np.reshape(x_train, (x_train.shape[0], 28, 28, 1))
 x_test = np.reshape(x_test, (x_test.shape[0], 28, 28, 1))
