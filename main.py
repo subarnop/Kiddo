@@ -6,6 +6,8 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint
+from keras import backend as K
+
 from load_data import *
 
 epochs = 20
@@ -30,8 +32,12 @@ print('Class names:', class_names)
 plt.figure(figsize=(10, 10))
 visualize(x_train, y_train, class_names)
 
-x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1).astype('float32')
-x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1).astype('float32')
+if K.image_dim_ordering() == 'th':
+    x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1], x_train.shape[2]).astype('float32')
+    x_test = x_test.reshape(x_test.shape[0], 1, x_test.shape[1], x_test.shape[2]).astype('float32')
+else:
+    x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1).astype('float32')
+    x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1).astype('float32')
 
  # convert class vectors to binary class matrices
 num_classes = len(class_names)
