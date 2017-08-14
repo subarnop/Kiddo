@@ -52,4 +52,6 @@ def visualize(X, Y, classes, samples_per_class=10):
             plt.axis('off')
             if i == 0:
                 plt.title(cls)
-    plt.show()
+    #plt.show()
+    plt.savefig('img/data.png')
+    plt.clf()

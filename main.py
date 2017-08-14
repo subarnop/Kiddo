@@ -2,15 +2,15 @@ import os
 import numpy as np
 import keras
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Dense, Dropout, Flatten, Activation
+from keras.layers import Convolution2D, MaxPooling2D
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 
 from load_data import *
 
-epochs = 20
+epochs = 100
 input_shape = (28, 28, 1)
 batch_size = 128
 
@@ -47,20 +47,23 @@ y_test = keras.utils.to_categorical(y_test, num_classes)
 # #Model definition
 model = Sequential()
 
-model.add(Conv2D(6, kernel_size=(3, 3), activation='relu', input_shape=input_shape, padding="same"))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(16, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(120, (3, 3), activation='relu'))
+model.add(Convolution2D(6, kernel_size=(3, 3), activation='elu', input_shape=input_shape, padding="same"))
+model.add(Convolution2D(32, kernel_size=(3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
 model.add(Dropout(0.25))
+
+model.add(Convolution2D(64, kernel_size=(3, 3), border_mode='same', activation='elu'))
+model.add(Convolution2D(64, kernel_size=(3, 3), activation='elu'))
+model.add(MaxPooling2D(pool_size=(2,2)))
+model.add(Dropout(0.25))
+
 model.add(Flatten())
-model.add(Dense(84, activation='relu'))
+model.add(Dense(512, activation='elu'))
 model.add(Dropout(0.5))
 model.add(Dense(num_classes, activation='softmax'))
 
-model.compile(loss=keras.losses.categorical_crossentropy,
-             optimizer=keras.optimizers.Adadelta(),
-             metrics=['accuracy'])
+
+model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 
 print(model.summary())
 
