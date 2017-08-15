@@ -1,25 +1,24 @@
 import os
 import numpy as np
 import keras
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Flatten, Activation
-from keras.layers import Convolution2D, MaxPooling2D
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
 from load_data import *
+from model import load_model
 import config
 C = config.Config()
 
-epochs = C.epochs
-input_shape = C.input_shape
-batch_size = C.batch_size
+epochs      = C.epochs
+batch_size  = C.batch_size
+image_size  = C.image_size
 
 x_train, y_train, x_test, y_test, class_names = load_data('data')
+num_classes = len(class_names)
 
 # Reshape and normalize
-x_train = x_train.reshape(x_train.shape[0], 28, 28).astype('float32')
-x_test = x_test.reshape(x_test.shape[0], 28, 28).astype('float32')
+x_train = x_train.reshape(x_train.shape[0], image_size, image_size).astype('float32')
+x_test = x_test.reshape(x_test.shape[0], image_size, image_size).astype('float32')
 
 x_train /= 255.0
 x_test /= 255.0
@@ -34,50 +33,33 @@ plt.figure(figsize=(10, 10))
 visualize(x_train, y_train, class_names)
 
 if K.image_dim_ordering() == 'th':
-    x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1], x_train.shape[2]).astype('float32')
-    x_test = x_test.reshape(x_test.shape[0], 1, x_test.shape[1], x_test.shape[2]).astype('float32')
+    x_train = x_train.reshape(x_train.shape[0], 1, image_size, image_size).astype('float32')
+    x_test = x_test.reshape(x_test.shape[0], 1, image_size, image_size).astype('float32')
+    input_shape = (1, image_size, image_size)
 else:
-    x_train = x_train.reshape(x_train.shape[0], x_train.shape[1], x_train.shape[2], 1).astype('float32')
-    x_test = x_test.reshape(x_test.shape[0], x_test.shape[1], x_test.shape[2], 1).astype('float32')
+    x_train = x_train.reshape(x_train.shape[0], image_size, image_size, 1).astype('float32')
+    x_test = x_test.reshape(x_test.shape[0], image_size, image_size, 1).astype('float32')
+    input_shape = (image_size, image_size, 1)
 
- # convert class vectors to binary class matrices
-num_classes = len(class_names)
+# Convert class vectors to binary class matrices
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
-#
-# #Model definition
-model = Sequential()
 
-model.add(Convolution2D(6, kernel_size=(3, 3), activation='elu', input_shape=input_shape, padding="same"))
-model.add(Convolution2D(32, kernel_size=(3, 3), activation='elu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.25))
-
-model.add(Convolution2D(64, kernel_size=(3, 3), border_mode='same', activation='elu'))
-model.add(Convolution2D(64, kernel_size=(3, 3), activation='elu'))
-model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.25))
-
-model.add(Flatten())
-model.add(Dense(512, activation='elu'))
-model.add(Dropout(0.5))
-model.add(Dense(num_classes, activation='softmax'))
-
-
+# Load model
+model = load_model(input_shape, num_classes)
 model.compile(loss='categorical_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-
 print(model.summary())
 
-#For saving weight
-save_filename = 'weights.h5'
-callback_period = 5
-verbose = 1
+save_filename   = C.save_filename
+callback_period = C.callback_period
+verbosity       = C.verbosity
+
 if not os.path.exists(save_filename):
     # Model checkpoint callback
     checkpoint = ModelCheckpoint(
         save_filename,
         monitor='val_acc',
-        verbose=verbose,
+        verbose=verbosity,
         save_best_only=True,
         save_weights_only=False,
         mode='auto',
@@ -86,7 +68,7 @@ if not os.path.exists(save_filename):
     # Fit the model
     history = model.fit(
         x_train, y_train,
-        epochs=epochs, batch_size=batch_size, verbose=verbose,
+        epochs=epochs, batch_size=batch_size, verbose=verbosity,
         validation_data=(x_test, y_test),
         callbacks=[checkpoint])
 
