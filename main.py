@@ -7,12 +7,13 @@ from keras.layers import Convolution2D, MaxPooling2D
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint
 from keras import backend as K
-
 from load_data import *
+import config
+C = config.Config()
 
-epochs = 100
-input_shape = (28, 28, 1)
-batch_size = 128
+epochs = C.epochs
+input_shape = C.input_shape
+batch_size = C.batch_size
 
 x_train, y_train, x_test, y_test, class_names = load_data('data')
 
